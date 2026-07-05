@@ -1,58 +1,100 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Reading Room
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A self-hosted personal reading journal built with Laravel 13. Single-user, authentication-gated. Ported from a Django experiment and built as a serious Laravel learning project — proper idioms throughout.
 
-## About Laravel
+## What it does
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**Shelf** — the main view of your reading life:
+- Books organized by status: To Read, Reading, Read
+- Start and finish dates
+- Tags (comma-separated, user-scoped)
+- Journal entry count per book
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+**Journal** — a chronological feed of reading notes:
+- Write in Markdown, rendered to HTML
+- 0–5 star ratings
+- Private/public toggle
+- Tag filtering
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Tags** — a tag cloud with usage counts, linking to filtered book and journal views
 
-## Learning Laravel
+**Stats** — a reading dashboard:
+- Books by status
+- Monthly pace bar chart (last 12 months)
+- Top 5 authors by shelf count
+- Reading streak (consecutive months with at least one book finished)
+- Average star rating across all rated entries
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**Find a Book** — search Open Library by title, author, or keyword:
+- Cover images downloaded and stored locally
+- One click to add to shelf
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Import** — Goodreads CSV export import:
+- Deduplicates by ISBN, then title + author
+- Maps Goodreads shelves to reading status
+- Preserves start and finish dates
+- Optionally imports reviews as private journal entries
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Stack
 
-## Agentic Development
+- Laravel 13
+- Breeze (Blade + Tailwind CSS)
+- SQLite (development) / PostgreSQL (production)
+- league/commonmark (Markdown rendering)
+- intervention/image-laravel (cover image processing)
+- Open Library API (book search + covers — free, no API key)
+- Lora serif font, custom parchment/ink color palette
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Setup
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+touch database/database.sqlite
+php artisan migrate
+php artisan storage:link
+npm run build
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Edit `.env`:
+```
+ALLOW_REGISTRATION=true   # set to false after creating your account
+FILESYSTEM_DISK=public
+```
 
-## Contributing
+Start the server:
+```bash
+php artisan serve
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Register at `/register`, then set `ALLOW_REGISTRATION=false` in `.env`.
 
-## Code of Conduct
+## Goodreads import
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Export your library from Goodreads: **My Books → Import and export → Export library**. Upload the CSV at `/import`. Books already on your shelf are skipped — existing data is never overwritten.
 
-## Security Vulnerabilities
+## Development
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+php artisan serve        # start dev server
+npm run dev              # watch and rebuild assets
+php artisan migrate      # run pending migrations
+php artisan cache:clear  # clear application cache
+php artisan pint         # fix code style
+```
 
-## License
+## Current state
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Functionally complete. All planned features are working:
+
+- Auth (registration gated by env variable)
+- Shelf with status tracking, dates, and tags
+- Journal entries with Markdown, ratings, and privacy
+- Tag cloud and tag-filtered views
+- Reading stats dashboard
+- Open Library book search with cover downloads
+- Goodreads CSV import
+
+Planned for a future session: VPS deployment with PostgreSQL, Nginx, and a deploy workflow.
